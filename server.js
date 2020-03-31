@@ -1,27 +1,51 @@
-const express = require("express");
+// *********************************************************************************
+// Server.js - This file is the initial starting point for the Node/Express server.
+// *********************************************************************************
 
-const PORT = process.env.PORT || 8080;
+// Dependencies
+// =============================================================
+const EXPRESS = require("express");
+const BODYPARSER = require("body-parser");
+const PATH = require("path");
+const EXPHBS = require("express-handlebars");
 
-const app = express();
+// Sets up the Express App
+// =============================================================
+const APP = EXPRESS();
+const PORT = process.env.PORT || 3000;
 
-// Serve static content for the app from the "public" directory in the application directory.
-app.use(express.static("public"));
+// Sets up the Express app to handle data parsing
 
-// Parse application body as JSON
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+// parse application/x-www-form-urlencoded
+APP.use(BODYPARSER.urlencoded({ extended: true }));
+// parse application/json
+APP.use(BODYPARSER.json());
 
-// Set Handlebars.
-const exphbs = require("express-handlebars");
+// Static directory
+APP.use(EXPRESS.static(PATH.join(__dirname, 'public')));
 
-app.engine("handlebars", exphbs({ defaultLayout: "main" }));
-app.set("view engine", "handlebars");
-
+// Routes
+// =============================================================
+require('./routes')(APP);
 // Import routes and give the server access to them.
 
-
-// Start our server so that it can begin listening to client requests.
-app.listen(PORT, function() {
-  // Log (server-side) when our server has started
-  console.log("Server listening on: http://localhost:" + PORT);
+// catch 404 and forward to error handler
+APP.use(function(req, res, next) {
+  let err = new Error('Not Found');
+  err.status = 404;
+  next(err);
 });
+
+// Views
+// ============================================================
+APP.engine("handlebars", EXPHBS({ defaultLayout: "main" }));
+APP.set("view engine", "handlebars");
+
+// Starts the server to begin listening
+// =============================================================
+APP.listen(PORT, function() {
+  console.log("App listening on PORT " + PORT);
+});
+
+// our module get's exported as app.
+module.exports = APP;
